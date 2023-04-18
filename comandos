@@ -1,0 +1,6 @@
+g++ ej1.c -o ej1 -Wall // esto compila el archivo ej1.c en el ejecutable ej1
+
+./ej1 // esto ejecuta el ejecutable ej1
+
+strace -o kk.txt -f ./ej1 // muestra todos los system calls de todos los procesos que se ejecutan en el archivo ej1 y los guarda en el archivo kk.txt
+

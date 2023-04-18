@@ -16,7 +16,7 @@ int p_h[2];
 int h_p[2];
 
 
-const char *msg = "abcdefghijklmnopqrstuvwxyz";
+const char *msg = "abcdefghijklmnopqrstuvwxyz\n";
 
 void catch_child(int sig_num, siginfo_t *psiginfo, void *pcontext)
 {
@@ -41,12 +41,11 @@ void padre(int pid)
         perror("write en el pipe");
     
     close(p_h[1]);
-    
+
     while( read(h_p[0], &c, 1) )
         {
             putchar(c);
         }   
-    
     close(h_p[0]);
 
     while( 1 )

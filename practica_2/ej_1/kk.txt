@@ -1,0 +1,220 @@
+11612 execve("./ej1", ["./ej1"], 0x7ffe1b3b4538 /* 86 vars */) = 0
+11612 brk(NULL)                         = 0x5568ee13e000
+11612 arch_prctl(0x3001 /* ARCH_??? */, 0x7fffb0e817f0) = -1 EINVAL (Invalid argument)
+11612 mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f905e56e000
+11612 access("/etc/ld.so.preload", R_OK) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/glibc-hwcaps/x86-64-v3/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/glibc-hwcaps/x86-64-v3", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/glibc-hwcaps/x86-64-v2/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/glibc-hwcaps/x86-64-v2", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/tls/x86_64/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/tls/x86_64/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/tls/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/tls/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/tls/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/tls/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/tls/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/tls", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/x86_64/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/x86_64/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/opt/rviz_ogre_vendor/lib", {st_mode=S_IFDIR|0755, st_size=4096, ...}, 0) = 0
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/glibc-hwcaps/x86-64-v3/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/glibc-hwcaps/x86-64-v3", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/glibc-hwcaps/x86-64-v2/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/glibc-hwcaps/x86-64-v2", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/tls/x86_64/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/tls/x86_64/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/tls/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/tls/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/tls/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/tls/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/tls/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/tls", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/x86_64/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/x86_64/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/x86_64-linux-gnu", {st_mode=S_IFDIR|0755, st_size=4096, ...}, 0) = 0
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/glibc-hwcaps/x86-64-v3/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/glibc-hwcaps/x86-64-v3", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/glibc-hwcaps/x86-64-v2/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/glibc-hwcaps/x86-64-v2", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/tls/x86_64/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/tls/x86_64/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/tls/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/tls/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/tls/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/tls/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/tls/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/tls", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/x86_64/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/x86_64/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/x86_64/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib/x86_64", 0x7fffb0e80a10, 0) = -1 ENOENT (No such file or directory)
+11612 openat(AT_FDCWD, "/opt/ros/humble/lib/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+11612 newfstatat(AT_FDCWD, "/opt/ros/humble/lib", {st_mode=S_IFDIR|0755, st_size=36864, ...}, 0) = 0
+11612 openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+11612 newfstatat(3, "", {st_mode=S_IFREG|0644, st_size=157403, ...}, AT_EMPTY_PATH) = 0
+11612 mmap(NULL, 157403, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7f905e547000
+11612 close(3)                          = 0
+11612 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+11612 read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0P\237\2\0\0\0\0\0"..., 832) = 832
+11612 pread64(3, "\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0"..., 784, 64) = 784
+11612 pread64(3, "\4\0\0\0 \0\0\0\5\0\0\0GNU\0\2\0\0\300\4\0\0\0\3\0\0\0\0\0\0\0"..., 48, 848) = 48
+11612 pread64(3, "\4\0\0\0\24\0\0\0\3\0\0\0GNU\0i8\235HZ\227\223\333\350s\360\352,\223\340."..., 68, 896) = 68
+11612 newfstatat(3, "", {st_mode=S_IFREG|0644, st_size=2216304, ...}, AT_EMPTY_PATH) = 0
+11612 pread64(3, "\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0"..., 784, 64) = 784
+11612 mmap(NULL, 2260560, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7f905e200000
+11612 mmap(0x7f905e228000, 1658880, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x28000) = 0x7f905e228000
+11612 mmap(0x7f905e3bd000, 360448, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1bd000) = 0x7f905e3bd000
+11612 mmap(0x7f905e415000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x214000) = 0x7f905e415000
+11612 mmap(0x7f905e41b000, 52816, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7f905e41b000
+11612 close(3)                          = 0
+11612 mmap(NULL, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f905e544000
+11612 arch_prctl(ARCH_SET_FS, 0x7f905e544740) = 0
+11612 set_tid_address(0x7f905e544a10)   = 11612
+11612 set_robust_list(0x7f905e544a20, 24) = 0
+11612 rseq(0x7f905e5450e0, 0x20, 0, 0x53053053) = 0
+11612 mprotect(0x7f905e415000, 16384, PROT_READ) = 0
+11612 mprotect(0x5568eca82000, 4096, PROT_READ) = 0
+11612 mprotect(0x7f905e5a8000, 8192, PROT_READ) = 0
+11612 prlimit64(0, RLIMIT_STACK, NULL, {rlim_cur=8192*1024, rlim_max=RLIM64_INFINITY}) = 0
+11612 munmap(0x7f905e547000, 157403)    = 0
+11612 getpid()                          = 11612
+11612 newfstatat(1, "", {st_mode=S_IFCHR|0620, st_rdev=makedev(0x88, 0x2), ...}, AT_EMPTY_PATH) = 0
+11612 getrandom("\x00\x77\x1a\x88\xfc\xd3\x20\xac", 8, GRND_NONBLOCK) = 8
+11612 brk(NULL)                         = 0x5568ee13e000
+11612 brk(0x5568ee15f000)               = 0x5568ee15f000
+11612 write(1, "[./ej1] mi pid es 11612\n", 24) = 24
+11612 rt_sigaction(SIGCHLD, {sa_handler=0x5568eca80369, sa_mask=~[RTMIN RT_1], sa_flags=SA_RESTORER|SA_SIGINFO, sa_restorer=0x7f905e242520}, NULL, 8) = 0
+11612 pipe2([3, 4], 0)                  = 0
+11612 pipe2([5, 6], 0)                  = 0
+11612 clone(child_stack=NULL, flags=CLONE_CHILD_CLEARTID|CLONE_CHILD_SETTID|SIGCHLD, child_tidptr=0x7f905e544a10) = 11613
+11612 getpid()                          = 11612
+11613 set_robust_list(0x7f905e544a20, 24) = 0
+11612 write(1, "hello from padre (11612), hijo e"..., 40) = 40
+11613 getppid( <unfinished ...>
+11612 close(3 <unfinished ...>
+11613 <... getppid resumed>)            = 11612
+11612 <... close resumed>)              = 0
+11613 getpid( <unfinished ...>
+11612 close(6 <unfinished ...>
+11613 <... getpid resumed>)             = 11613
+11612 <... close resumed>)              = 0
+11612 newfstatat(0, "",  <unfinished ...>
+11613 write(1, "hello from hijo, mi pid es 11613"..., 52 <unfinished ...>
+11612 <... newfstatat resumed>{st_mode=S_IFCHR|0620, st_rdev=makedev(0x88, 0x2), ...}, AT_EMPTY_PATH) = 0
+11613 <... write resumed>)              = 52
+11612 read(0,  <unfinished ...>
+11613 close(4)                          = 0
+11613 close(5)                          = 0
+11613 read(3,  <unfinished ...>
+11612 <... read resumed>"\n", 1024)     = 1
+11612 write(4, "abcdefghijklmnopqrstuvwxyz\n", 27) = 27
+11612 close(4 <unfinished ...>
+11613 <... read resumed>"a", 1)         = 1
+11612 <... close resumed>)              = 0
+11613 read(3,  <unfinished ...>
+11612 read(5,  <unfinished ...>
+11613 <... read resumed>"b", 1)         = 1
+11613 read(3, "c", 1)                   = 1
+11613 read(3, "d", 1)                   = 1
+11613 read(3, "e", 1)                   = 1
+11613 read(3, "f", 1)                   = 1
+11613 read(3, "g", 1)                   = 1
+11613 read(3, "h", 1)                   = 1
+11613 read(3, "i", 1)                   = 1
+11613 read(3, "j", 1)                   = 1
+11613 read(3, "k", 1)                   = 1
+11613 read(3, "l", 1)                   = 1
+11613 read(3, "m", 1)                   = 1
+11613 read(3, "n", 1)                   = 1
+11613 read(3, "o", 1)                   = 1
+11613 read(3, "p", 1)                   = 1
+11613 read(3, "q", 1)                   = 1
+11613 read(3, "r", 1)                   = 1
+11613 read(3, "s", 1)                   = 1
+11613 read(3, "t", 1)                   = 1
+11613 read(3, "u", 1)                   = 1
+11613 read(3, "v", 1)                   = 1
+11613 read(3, "w", 1)                   = 1
+11613 read(3, "x", 1)                   = 1
+11613 read(3, "y", 1)                   = 1
+11613 read(3, "z", 1)                   = 1
+11613 read(3, "\n", 1)                  = 1
+11613 write(1, "abcdefghijklmnopqrstuvwxyz\n", 27) = 27
+11613 read(3, "", 1)                    = 0
+11613 close(3)                          = 0
+11613 write(6, "ABCDEFGHIJKLMNOPQRSTUVWXYZ\352\n", 28 <unfinished ...>
+11612 <... read resumed>"A", 1)         = 1
+11613 <... write resumed>)              = 28
+11612 read(5,  <unfinished ...>
+11613 write(1, "\n", 1 <unfinished ...>
+11612 <... read resumed>"B", 1)         = 1
+11613 <... write resumed>)              = 1
+11612 read(5,  <unfinished ...>
+11613 write(1, "ABCDEFGHIJKLMNOPQRSTUVWXYZ\352\n", 28 <unfinished ...>
+11612 <... read resumed>"C", 1)         = 1
+11613 <... write resumed>)              = 28
+11612 read(5,  <unfinished ...>
+11613 write(1, "\n", 1 <unfinished ...>
+11612 <... read resumed>"D", 1)         = 1
+11612 read(5,  <unfinished ...>
+11613 <... write resumed>)              = 1
+11612 <... read resumed>"E", 1)         = 1
+11613 getpid( <unfinished ...>
+11612 read(5,  <unfinished ...>
+11613 <... getpid resumed>)             = 11613
+11612 <... read resumed>"F", 1)         = 1
+11613 write(1, "(11613) pipe closed, bye\n", 25 <unfinished ...>
+11612 read(5, "G", 1)                   = 1
+11613 <... write resumed>)              = 25
+11612 read(5,  <unfinished ...>
+11613 close(6 <unfinished ...>
+11612 <... read resumed>"H", 1)         = 1
+11613 <... close resumed>)              = 0
+11612 read(5, "I", 1)                   = 1
+11612 read(5, "J", 1)                   = 1
+11612 read(5,  <unfinished ...>
+11613 exit_group(0 <unfinished ...>
+11612 <... read resumed>"K", 1)         = 1
+11613 <... exit_group resumed>)         = ?
+11612 read(5, "L", 1)                   = 1
+11612 read(5, "M", 1)                   = 1
+11612 read(5, "N", 1)                   = 1
+11612 read(5,  <unfinished ...>
+11613 +++ exited with 0 +++
+11612 <... read resumed>"O", 1)         = 1
+11612 --- SIGCHLD {si_signo=SIGCHLD, si_code=CLD_EXITED, si_pid=11613, si_uid=1000, si_status=0, si_utime=0, si_stime=0} ---
+11612 wait4(-1, NULL, 0, NULL)          = 11613
+11612 write(1, "ABCDEFGHIJKLMNRecibi signal #17 "..., 63) = 63
+11612 rt_sigreturn({mask=[]})           = 1
+11612 read(5, "P", 1)                   = 1
+11612 read(5, "Q", 1)                   = 1
+11612 read(5, "R", 1)                   = 1
+11612 read(5, "S", 1)                   = 1
+11612 read(5, "T", 1)                   = 1
+11612 read(5, "U", 1)                   = 1
+11612 read(5, "V", 1)                   = 1
+11612 read(5, "W", 1)                   = 1
+11612 read(5, "X", 1)                   = 1
+11612 read(5, "Y", 1)                   = 1
+11612 read(5, "Z", 1)                   = 1
+11612 read(5, "\352", 1)                = 1
+11612 read(5, "\n", 1)                  = 1
+11612 write(1, "OPQRSTUVWXYZ\352\n", 14) = 14
+11612 read(5, "", 1)                    = 0
+11612 close(5)                          = 0
+11612 pause()                           = ? ERESTARTNOHAND (To be restarted if no handler)
+11612 --- SIGINT {si_signo=SIGINT, si_code=SI_KERNEL} ---
+11612 +++ killed by SIGINT +++
