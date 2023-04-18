@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "assert.h": "c",
-        "fcntl.h": "c"
+        "fcntl.h": "c",
+        "types.h": "c",
+        "wait.h": "c"
     }
 }
