@@ -36,9 +36,9 @@ void padre(int pid)
     while(1)
     {
         FD_ZERO(&rfds);
-        if( stdin_alive )
+        if( stdin_alive ) //tengo que hacer esto para que no se quede esperando en el select si stdin esta cerrado
             FD_SET(0, &rfds);
-        FD_SET(h_p[0], &rfds);
+        FD_SET(h_p[0], &rfds); // este siempre esta activo
 
         retval = select( h_p[0]+1 , &rfds, NULL, NULL, NULL); //hago select de stdin o de la lectura de hijo
         if( retval == -1 ) 
@@ -50,29 +50,29 @@ void padre(int pid)
         {
             if( FD_ISSET(0, &rfds) ) 
             {
-                printf("entre al isset de stdin");
+                printf("entre al isset de stdin\n");
                 if( ! (retval = read(0, buf, sizeof(buf)))) 
                 {
-                    puts("\nstdin closed");
+                    puts("\nstdin closed\n");
                     stdin_alive = false;
                     close(p_h[1]);
                 } else {
                     ret = write(p_h[1], buf, retval);
                     if( ret != sizeof(buf) )
-                        perror("write en el pipe");   
+                        perror("write en el pipe\n");   
                 }             
             }   
             if(FD_ISSET(h_p[0], &rfds))
             {
-                printf("entre al isset que lee del hijo");
+                printf("entre al isset que lee del hijo\n");
                 if( ! (retval = read(h_p[0], BUF, sizeof(BUF))) ) 
                 {
-                    puts("\nbye");
+                    puts("\nbye\");
                     break;
                 }
                 ret = write(1, BUF, retval);
                 if( ret != sizeof(BUF) )
-                    perror("write en el pipe");
+                    perror("write en el pipe\n");
             }
         }
 
