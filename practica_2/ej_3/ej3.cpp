@@ -67,7 +67,7 @@ void padre(int pid)
                 printf("entre al isset que lee del hijo\n");
                 if( ! (retval = read(h_p[0], BUF, sizeof(BUF))) ) 
                 {
-                    puts("\nbye\");
+                    puts("\nbye\n");
                     break;
                 }
                 ret = write(1, BUF, retval);
