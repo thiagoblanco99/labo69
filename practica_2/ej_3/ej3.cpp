@@ -51,26 +51,26 @@ void padre(int pid)
             if( FD_ISSET(0, &rfds) ) 
             {
                 printf("entre al isset de stdin\n");
-                if( ! (retval = read(0, buf, sizeof(buf)))) 
-                {
+                if( ! (retval = read(0, buf, sizeof(buf)))) //retval me dice la cantidad de caracteres que leyo
+                { //esta condicion se cumple cuando stdin esta cerrado
                     puts("\nstdin closed\n");
-                    stdin_alive = false;
-                    close(p_h[1]);
-                } else {
-                    ret = write(p_h[1], buf, retval);
+                    stdin_alive = false; // si entro a este if es porque ya termino de leer de stdin, uso esta stdin_alive para no meter el stdin en el set de file descriptors
+                    close(p_h[1]);//mato el fd que habla de padre a hijo asi el Perl manda la info que tiene en el buffer
+                } else {//esta condicion se cumple cuando stdin esta abierto
+                    ret = write(p_h[1], buf, retval);//escribo en el pipe lo que leyo de stdin y uso retval para saber cuantos caracteres escribir
                     if( ret != sizeof(buf) )
                         perror("write en el pipe\n");   
                 }             
-            }   
+            } 
             if(FD_ISSET(h_p[0], &rfds))
             {
                 printf("entre al isset que lee del hijo\n");
-                if( ! (retval = read(h_p[0], BUF, sizeof(BUF))) ) 
+                if( ! (retval = read(h_p[0], BUF, sizeof(BUF))) )//si entro aca es porque estoy leyendo cosas del hijo 
                 {
                     puts("\nbye\n");
                     break;
                 }
-                ret = write(1, BUF, retval);
+                ret = write(1, BUF, retval); //si leyo del pipe que viene del hijo, muestro en pantalla 
                 if( ret != sizeof(BUF) )
                     perror("write en el pipe\n");
             }
@@ -81,8 +81,6 @@ void padre(int pid)
     
     getchar();
     
-    
-    open(/dev/tty);
     close(h_p[0]);
     close(p_h[1]);
 }
@@ -94,15 +92,15 @@ void hijo()
     printf("estoy aca hijo\n");
     close(p_h[1]);
     close(h_p[0]);
-    close(0);
-    close(1);
-    int d0 = dup2(p_h[0], 0);
+    close(0);//cierro stdinpunt
+    close(1);//cierro stdoutput
+    int d0 = dup2(p_h[0], 0); // copio el fd de lectura del pipe al fd 0
         if(d0==-1)
             perror("dup2 de 0");
-    int d1 = dup2(h_p[1], 1);
+    int d1 = dup2(h_p[1], 1); // copio el fd de escritura del pipe al fd 1
         if(d1==-1)
             perror("dup2 de 1");
-    fprintf(stderr,"duplique los fd en los standar inputs y outputs\n");
+    fprintf(stderr,"duplique los fd en los standar inputs y outputs\n");//uso stderr para que no se bloquee la salida, porque el stout ya no existe aca; TRUCAZO para debuggear
     close(p_h[0]);
     close(h_p[1]);
     fprintf(stderr,"cierro los fd duplicados\n");
