@@ -38,7 +38,7 @@ int main()
     vector<thread> v;
 
     for( int i = 0; i < 50; ++i ) {
-        v.emplace_back(fincr, 10000);
+        v.emplace_back(fincr, 10000);//pone un thread mas en el vector de threads y lo inicializa con 10000, osea fincr(10000)
         v.emplace_back(fdecr, 10000);
     }
 

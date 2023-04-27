@@ -68,7 +68,7 @@ int main()
     bool run = true;
 
     for( int i = 0; i < 2; ++i )
-        cons.emplace_back(consumer, i, ref(syncQueue), &run);
+        cons.emplace_back(consumer, i, ref(syncQueue), &run); //pasa syncqueue como referencia.
 
     for( int i = 0; i < 3; ++i )
         prods.emplace_back(producer, i, std::ref(syncQueue), 10);
