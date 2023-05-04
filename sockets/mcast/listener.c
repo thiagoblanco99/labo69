@@ -51,11 +51,11 @@ int main(int argc, char *argv[])
      }
      
      /* use setsockopt() to request that the kernel join a multicast group */
-     mreq.imr_multiaddr.s_addr=inet_addr(HELLO_GROUP);
-     mreq.imr_address.s_addr=htonl(INADDR_ANY);
-     mreq.imr_ifindex = 0;
+     mreq.imr_multiaddr.s_addr=inet_addr(HELLO_GROUP);// la estructura esta en man 7 ip y es la estructura para mandarle la ip multicast a add membership
+     mreq.imr_address.s_addr=htonl(INADDR_ANY);// la ip de la interfaz de red que se va a usar
+     mreq.imr_ifindex = 0;// el indice de la interfaz de red que se va a usar
      if (setsockopt(fd,IPPROTO_IP,IP_ADD_MEMBERSHIP,&mreq,sizeof(mreq)) < 0) {
-	  perror("setsockopt");
+	  perror("setsockopt");// se le manda el fd, el protocolo y la estructura con la ip multicast y la ip de la interfaz de red
 	  exit(1);
      }
 

@@ -6,33 +6,77 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <assert.h>
-QUEUE_MAX_SIZE = 10;
+#include <sys/stat.h>
 
 typedef struct {
-    int inicio; // índice de inicio de la cola
-    int fin; // índice de fin de la cola
-    int contador; // cantidad de elementos en la cola
+    int putter; // índice donde pone 
+    int getter; // índice donde saca
     int max_size; // tamaño máximo de la cola
-    int buffer[QUEUE_MAX_SIZE]; // arreglo de elementos de la cola
-    sem_t *mutex; // semáforo de acceso a la cola
-    sem_t *empty; // semáforo de entradas libres en la cola
-    sem_t *full; // semáforo de elementos en la cola
+    sem_t mutex; // semáforo de acceso a la cola
+    sem_t empty; // semáforo para getters
+    sem_t full; // semáforo para putters
+    int buffer[0]; // puntero al inicio de la cola
 } Queue_t;
 
-Queue_t *QueueCreate(const char *qname, uint32_t qsize) {
+Queue_t *QueueCreate(const char *qname, uint32_t qsize) { //creo un nuevo segmento de memoria compartida de queue_t + el buffer con qsize
+
     int shmfd = shm_open(qname, O_CREAT | O_RDWR, 0640);
     assert(shmfd > 0);
-    ftruncate(shmfd, sizeof(Queue_t));
-    Queue_t *cola =(Queue_t *)mmap(NULL, sizeof(Queue_t), PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
+
+    ftruncate(shmfd, sizeof(Queue_t) + qsize * sizeof(int));
+
+    Queue_t *cola =(Queue_t *)mmap(NULL, sizeof(Queue_t)+ qsize * sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
     assert(cola != MAP_FAILED);
+
     close(shmfd);
-
     cola->max_size = qsize;
+    cola->putter = 0;
+    cola->getter = 0;
+    sem_init(&cola->mutex, 1, 1);//1 es el valor inicial del semaforo
+    sem_init(&cola->empty, 1, 0);// 
+    sem_init(&cola->full, 1, qsize);// 
+    return cola;
+    }
+    
+Queue_t *QueueAttach(const char *qname){
 
+    struct stat st;
+    int shmfd = shm_open(qname,O_RDWR, 0640);
+    assert(shmfd >= 0);
+    int error = fstat(shmfd, &st);
+    assert(error==0);
+    Queue_t *cola =(Queue_t *)mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
+    assert(cola != (Queue_t*)-1);
+    close(shmfd);
+    return cola;
+    }
 
+void QueueDetach(Queue_t *q){
 
+    int error = munmap(q, sizeof(Queue_t)+ q->max_size * sizeof(int));
+    assert(error == 0);
+    }
 
+void QueueDestroy(Queue_t *pQ){
+    
+        int error = shm_unlink(pQ); // es así o tengo que borrar tambien la parte del buffer que no agregue en Queue_t ?
+        assert(error == 0);
+        }
 
+void QueuePut(Queue_t *pQ, int elem){
+    
+    int lugar = pQ->putter%pQ->max_size;
+    sem_wait(&pQ->full);
+    sem_wait(&pQ->mutex);
+    pQ->buffer[lugar] = elem;
+    pQ->putter++;
+    sem_post(&pQ->mutex);
+    sem_post(&pQ->empty);
+
+    }
+
+int QueueGet(Queue_t *pQ){
+    
 
 
     }
