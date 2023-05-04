@@ -37,7 +37,7 @@ inline static uint16_t getSize8(const Header *hdr)
 typedef struct __attribute__((__packed__)) 
 {
     uint8_t len8;
-    char str[0];
+    char str[0]; // esto es pegriloso. No se puede hacer sizeof(VString) porque no se sabe el tamaño de str. Se puede hacer sizeof(VString) + len8
 } VString;
 
 
@@ -47,7 +47,7 @@ typedef struct __attribute__((__packed__))
     uint32_t algo;
 } Ping;
 
-#define AAA_SZ8 64UL
+#define AAA_SZ8 64UL // unsigned long iniciado con numero 64.
 // static const size_t AAA_SZ8 = 64;
 
 typedef struct __attribute__((__packed__)) 
@@ -66,7 +66,7 @@ typedef struct __attribute__((__packed__))
 {
     Header hdr;
 
-    union __attribute__((__packed__)) {
+    union __attribute__((__packed__)) { // union permite guardar el mismo espacio de memoria para distintos tipos de datos y el espacio es del tipo mas grande de los que se guardan. Es similar al struct.
         Ping ping;
         Pong pong;
         User user;
@@ -92,12 +92,12 @@ inline static void setUserV1(Msg *msg, const char *u)
 {
     msg->hdr.version = htons(VER_1);
     msg->hdr.type = TYPE_USER;
-    size_t len8 = strlen(u);
-    assert(len8 <= sizeof(uint8_t));
-    assert(len8 != 0);
-    memcpy(msg->payload.user.username.str, u, len8);
-    msg->payload.user.username.len8 = len8 - 1;
-    msg->hdr.size8 = htons(sizeof(Header) + sizeof(VString)) + len8;
+    size_t len8 = strlen(u); // 
+    assert(len8 <= sizeof(uint8_t)); // no puede ser mayor a 255
+    assert(len8 != 0); // no puede ser 0 porque el usuario no puede ser vacio
+    memcpy(msg->payload.user.username.str, u, len8); // copia el usuario en el payload
+    msg->payload.user.username.len8 = len8 - 1; // le resta 1 porque el len8 es el tamaño del usuario + 1
+    msg->hdr.size8 = htons(sizeof(Header) + sizeof(VString)) + len8; // el tamaño del header + el tamaño del usuario
 }
 
 inline static const char *getUserNameV1(Msg *msg)
