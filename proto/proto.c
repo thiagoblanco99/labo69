@@ -22,10 +22,10 @@ int sendMsg(int sockfd, const Msg *msg)
 
     while( toSend ) {
         sent = send(sockfd, ptr, toSend, 0);
-        if( (sent == -1 && errno != EINTR) || sent == 0 )
+        if( (sent == -1 && errno != EINTR) || sent == 0 ) //el errno es el EINTR, que es un error de interrupcion de llamada 
             return sent;
-        toSend -= sent;
-        ptr += sent;
+        toSend -= sent; // esto es para evitar errores de envio
+        ptr += sent; // junto a esto. Si no se envia todo, se envia lo que se pudo enviar.
     }
     return 1;
 }
@@ -39,7 +39,7 @@ int recvMsg(int sockfd, Msg *msg)
 {
     size_t toRecv = sizeof(Header);
     ssize_t recvd;
-    uint8_t *ptr = (uint8_t *) &msg->hdr;
+    uint8_t *ptr = (uint8_t *) &msg->hdr; // este puntero es así para sumar de a un byte y no irte al siguiente mensaje cuando sumas 1.
     int headerRecvd = 0;
 
     while( toRecv ) {
