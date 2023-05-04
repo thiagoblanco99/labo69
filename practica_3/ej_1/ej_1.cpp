@@ -9,9 +9,9 @@
 #include <sys/stat.h>
 
 typedef struct {
-    int putter; // índice donde pone 
-    int getter; // índice donde saca
-    int max_size; // tamaño máximo de la cola
+    uint putter; // índice donde pone 
+    uint getter; // índice donde saca
+    uint max_size; // tamaño máximo de la cola
     sem_t mutex; // semáforo de acceso a la cola
     sem_t empty; // semáforo para getters
     sem_t full; // semáforo para putters
@@ -58,9 +58,12 @@ void QueueDetach(Queue_t *q){
     }
 
 void QueueDestroy(Queue_t *pQ){
-    
-        int error = shm_unlink(pQ); // es así o tengo que borrar tambien la parte del buffer que no agregue en Queue_t ?
-        assert(error == 0);
+
+        sem_destroy(&pQ->mutex);
+        sem_destroy(&pQ->empty);//esta bien destruir estos semaforos ? 
+        sem_destroy(&pQ->full);
+        int error = shm_unlink((char*)pQ); // es así o tengo que borrar tambien la parte del buffer que no agregue en Queue_t ?
+        assert(error == 0);//el casteo de arriba esta bien ? 
         }
 
 void QueuePut(Queue_t *pQ, int elem){
@@ -77,6 +80,21 @@ void QueuePut(Queue_t *pQ, int elem){
 
 int QueueGet(Queue_t *pQ){
     
+    int lugar = pQ->getter%pQ->max_size;
+    sem_wait(&pQ->empty);
+    sem_wait(&pQ->mutex);
+    int elem = pQ->buffer[lugar];
+    pQ->getter++;
+    sem_post(&pQ->mutex);
+    sem_post(&pQ->full);
+    return elem;
 
+    }
+
+int QueueCnt(Queue_t *pQ){
+    sem_wait(&pQ->mutex);
+    int cant = pQ->putter%pQ->max_size - pQ->getter%pQ->max_size;
+    sem_post(&pQ->mutex);
+    return cant;
 
     }
