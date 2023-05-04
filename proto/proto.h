@@ -21,7 +21,7 @@ typedef struct __attribute__((__packed__)) // __attribute__((__packed__)) es par
     uint16_t version;
     uint8_t  type;
     // 1 byte de relleno// aca habria un byte de relleno si no usamos __attribute__((__packed__))
-    uint16_t size8;
+    uint16_t size8; // size8 es el tamaño del mensaje en bytes
 } Header;
 
 inline static uint16_t getVersion(const Header *hdr)// inline hace que se compile la funcion en el lugar donde se llama, en vez de hacer un llamado a la funcion
