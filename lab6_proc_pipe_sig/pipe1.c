@@ -52,8 +52,7 @@ void hijo()
 
     close(pfd[1]);
 
-    while( read(pfd[0], &c, 1) )
-        putchar(c);
+    
 
     printf("(%d) pipe closed, bye\n", getpid());
     
