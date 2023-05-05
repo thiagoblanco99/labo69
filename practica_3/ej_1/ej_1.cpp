@@ -68,9 +68,10 @@ void QueueDestroy(Queue_t *pQ){
 
 void QueuePut(Queue_t *pQ, int elem){
     
-    int lugar = pQ->putter%pQ->max_size;
+    
     sem_wait(&pQ->full);
     sem_wait(&pQ->mutex);
+    int lugar = pQ->putter%pQ->max_size;
     pQ->buffer[lugar] = elem;
     pQ->putter++;
     sem_post(&pQ->mutex);
@@ -80,9 +81,10 @@ void QueuePut(Queue_t *pQ, int elem){
 
 int QueueGet(Queue_t *pQ){
     
-    int lugar = pQ->getter%pQ->max_size;
+    
     sem_wait(&pQ->empty);
     sem_wait(&pQ->mutex);
+    int lugar = pQ->getter%pQ->max_size;
     int elem = pQ->buffer[lugar];
     pQ->getter++;
     sem_post(&pQ->mutex);
