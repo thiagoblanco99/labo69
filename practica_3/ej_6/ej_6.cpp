@@ -1,20 +1,31 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <semaphore.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <unistd.h>
-#include <assert.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <math.h>
+#include <signal.h>
+#include <string.h>
+#include <sys/time.h>
+#include <cstdlib>
+#include <semaphore.h>
+#include <sys/mman.h>
+#include <assert.h>
+#include <stdint.h>
 
 typedef struct {
     uint putter; // índice donde pone 
     uint getter; // índice donde saca
-    uint max_size; // tamaño máximo de la cola
+    uint32_t max_size; // tamaño máximo de la cola
     sem_t mutex; // semáforo de acceso a la cola
     sem_t empty; // semáforo para getters
     sem_t full; // semáforo para putters
+    char nombre[20];
     int buffer[0]; // puntero al inicio de la cola
 } Queue_t;
 
@@ -27,14 +38,16 @@ Queue_t *QueueCreate(const char *qname, uint32_t qsize) { //creo un nuevo segmen
 
     Queue_t *cola =(Queue_t *)mmap(NULL, sizeof(Queue_t)+ qsize * sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
     assert(cola != MAP_FAILED);
-
     close(shmfd);
     cola->max_size = qsize;
     cola->putter = 0;
     cola->getter = 0;
+
+    memcpy(cola->nombre,qname,strlen(qname)+1);
     sem_init(&cola->mutex, 1, 1);//1 es el valor inicial del semaforo
     sem_init(&cola->empty, 1, 0);// 
-    sem_init(&cola->full, 1, qsize);// 
+    sem_init(&cola->full, 1, qsize);//
+    
     return cola;
     }
     
@@ -62,7 +75,7 @@ void QueueDestroy(Queue_t *pQ){
         sem_destroy(&pQ->mutex);
         sem_destroy(&pQ->empty);//esta bien destruir estos semaforos ? 
         sem_destroy(&pQ->full);
-        int error = shm_unlink((char*)pQ); // es así o tengo que borrar tambien la parte del buffer que no agregue en Queue_t ?
+        int error = shm_unlink((const char*)&pQ->nombre); // es así o tengo que borrar tambien la parte del buffer que no agregue en Queue_t ?
         assert(error == 0);//el casteo de arriba esta bien ? 
         }
 
@@ -95,8 +108,75 @@ int QueueGet(Queue_t *pQ){
 
 int QueueCnt(Queue_t *pQ){
     sem_wait(&pQ->mutex);
-    int cant = pQ->putter%pQ->max_size - pQ->getter%pQ->max_size;
+    int cant = pQ->putter - pQ->getter;
     sem_post(&pQ->mutex);
     return cant;
 
     }
+
+//----------------------------------------------------------------------------
+// Ejercicio 6
+//----------------------------------------------------------------------------
+timeval t_inicio, t_fin;
+
+void padre(int num_bloq, int size_bloq, pid_t pid){
+    gettimeofday(&t_inicio, NULL);
+    Queue_t *cola = QueueCreate("cola", num_bloq*size_bloq);
+    int num = 0;
+    for(int i=0; i<num_bloq; i++){
+        num=0;
+        for(int j=0; j<size_bloq; j++){
+            QueuePut(cola, num);
+            //printf ("mande el numero %d\n", num);
+            num++;
+        }
+    }
+    QueueDetach(cola);
+
+    wait(NULL);
+
+    gettimeofday(&t_fin, NULL);
+    timeval resultado;
+    resultado.tv_sec = t_fin.tv_sec - t_inicio.tv_sec;
+    resultado.tv_usec = t_fin.tv_usec - t_inicio.tv_usec;
+    printf("el tiempo que tardo es: %ld segundos y %ld microsegundos\n",resultado.tv_sec, resultado.tv_usec);
+    }
+    
+void hijo(int size_bloq){
+    Queue_t *cola = QueueAttach("cola");
+    int num = 0;
+    while(QueueCnt(cola) > 0){
+        num = QueueGet(cola);
+        //printf("num: %d\n", num);
+    }
+    QueueDetach(cola);
+    //QueueDestroy(cola);
+    }
+
+int main(int argc, char *argv[]){
+	if(argc!=3){
+        printf("error: no hay dos argumentos");
+        return 1;
+    }
+    int num_bloq = atoi(argv[1]);
+    int size_bloq = atoi(argv[2]);
+    pid_t pid;
+    
+    pid = fork();
+    
+    switch( pid ) {
+        case 0:
+            hijo(size_bloq);
+            break;
+            
+        case -1:
+            perror("error en el fork:");
+            break;
+            
+        default:
+            padre(num_bloq, size_bloq, pid);
+            break;
+    }
+
+	return 0;
+}

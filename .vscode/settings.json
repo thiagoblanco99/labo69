@@ -1,8 +1,10 @@
 {
     "files.associations": {
+        "*.sdf": "html",
         "assert.h": "c",
         "fcntl.h": "c",
         "types.h": "c",
-        "wait.h": "c"
+        "wait.h": "c",
+        "cstdlib": "cpp"
     }
 }

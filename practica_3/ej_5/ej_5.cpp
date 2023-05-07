@@ -1,7 +1,6 @@
 #define _GNU_SOURCE
 
 #include <stdio.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <fcntl.h>
@@ -14,6 +13,10 @@
 #include <string.h>
 #include <sys/time.h>
 #include <cstdlib>
+#include <semaphore.h>
+#include <sys/mman.h>
+#include <assert.h>
+
 
 
 int p_h[2];
@@ -41,7 +44,7 @@ void padre(int num_bloq, int size_bloq){//tiene que retornar el tiempo
     
     close(p_h[1]);
     
-    while(1){    printf("%d \n",argc)
+    while(1){    printf("%d \n",ret);
         ret = read(h_p[0],&t_fin, sizeof(timeval));
         if( ret == -1 ){
             perror("read en el pipe");
