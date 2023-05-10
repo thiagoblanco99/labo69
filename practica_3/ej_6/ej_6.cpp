@@ -120,26 +120,25 @@ int QueueCnt(Queue_t *pQ){
 timeval t_inicio, t_fin;
 
 void padre(int num_bloq, int size_bloq, pid_t pid){
-    gettimeofday(&t_inicio, NULL);
+    
     Queue_t *cola = QueueCreate("cola", num_bloq*size_bloq);
-    int num = 0;
+    gettimeofday(&t_inicio, NULL);
     for(int i=0; i<num_bloq; i++){
-        num=0;
         for(int j=0; j<size_bloq; j++){
-            QueuePut(cola, num);
+            QueuePut(cola,j);
             //printf ("mande el numero %d\n", num);
-            num++;
         }
     }
-    QueueDetach(cola);
-
+    //QueueDetach(cola);
     wait(NULL);
 
     gettimeofday(&t_fin, NULL);
     timeval resultado;
     resultado.tv_sec = t_fin.tv_sec - t_inicio.tv_sec;
     resultado.tv_usec = t_fin.tv_usec - t_inicio.tv_usec;
-    printf("el tiempo que tardo es: %ld segundos y %ld microsegundos\n",resultado.tv_sec, resultado.tv_usec);
+    float tiempo_total = resultado.tv_sec + resultado.tv_usec / 1000000.0;
+    float W = num_bloq*4*size_bloq / tiempo_total;
+    printf("Tardo %ld segundos y %ld microsegundos\n El ancho de banda es %f Hz\n",resultado.tv_sec, resultado.tv_usec,W);    QueueDestroy(cola);
     }
     
 void hijo(int size_bloq){
@@ -150,7 +149,6 @@ void hijo(int size_bloq){
         //printf("num: %d\n", num);
     }
     QueueDetach(cola);
-    //QueueDestroy(cola);
     }
 
 int main(int argc, char *argv[]){
@@ -159,7 +157,7 @@ int main(int argc, char *argv[]){
         return 1;
     }
     int num_bloq = atoi(argv[1]);
-    int size_bloq = atoi(argv[2]);
+    int size_bloq = (atoi(argv[2]))/4;
     pid_t pid;
     
     pid = fork();

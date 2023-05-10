@@ -44,7 +44,7 @@ void padre(int num_bloq, int size_bloq){//tiene que retornar el tiempo
     
     close(p_h[1]);
     
-    while(1){    printf("%d \n",ret);
+    while(1){    //printf("%d \n",ret);
         ret = read(h_p[0],&t_fin, sizeof(timeval));
         if( ret == -1 ){
             perror("read en el pipe");
@@ -61,8 +61,9 @@ void padre(int num_bloq, int size_bloq){//tiene que retornar el tiempo
     timeval resultado;
     resultado.tv_sec = t_fin.tv_sec - t_inicio.tv_sec;
     resultado.tv_usec = t_fin.tv_usec - t_inicio.tv_usec;
-
-    printf("el tiempo que tardo es: %ld segundos y %ld microsegundos\n",resultado.tv_sec, resultado.tv_usec);
+    float tiempo_total = resultado.tv_sec + resultado.tv_usec / 1000000.0;
+    float W = num_bloq*4*size_bloq / tiempo_total;
+    printf("Tardo %ld segundos y %ld microsegundos\n El ancho de banda es %f Hz\n",resultado.tv_sec, resultado.tv_usec,W);
 }
 
 void hijo (int size_bloq){
@@ -96,7 +97,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     int num_bloq = atoi(argv[1]);
-    int size_bloq = atoi(argv[2]);
+    int size_bloq = (atoi(argv[2]))/4;
     pid_t pid;
     
     if( pipe(p_h) == -1 ) {
