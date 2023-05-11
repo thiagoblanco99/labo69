@@ -28,7 +28,7 @@ void padre(int num_bloq, int size_bloq){//tiene que retornar el tiempo
     close(p_h[0]);
     close(h_p[1]);
     int ret=0;
-    int buff[size_bloq] = {0};
+    char buff[size_bloq] = {'a'};
     gettimeofday(&t_inicio, NULL);
 
     for(int i=0;i<num_bloq;i++){
@@ -62,8 +62,8 @@ void padre(int num_bloq, int size_bloq){//tiene que retornar el tiempo
     resultado.tv_sec = t_fin.tv_sec - t_inicio.tv_sec;
     resultado.tv_usec = t_fin.tv_usec - t_inicio.tv_usec;
     float tiempo_total = resultado.tv_sec + resultado.tv_usec / 1000000.0;
-    float W = num_bloq*4*size_bloq / tiempo_total;
-    printf("Tardo %ld segundos y %ld microsegundos\n El ancho de banda es %f Hz\n",resultado.tv_sec, resultado.tv_usec,W);
+    float W = num_bloq*size_bloq / tiempo_total;
+    printf("Se mandaron %d bloques de %d bytes en %ld segundos y %ld microsegundos\n El ancho de banda es %f byte/s\n",num_bloq,size_bloq,resultado.tv_sec, resultado.tv_usec,W);
 }
 
 void hijo (int size_bloq){
@@ -71,10 +71,10 @@ void hijo (int size_bloq){
     close(h_p[0]);
     int ret=0;
     int cont=0;
-    int buff[size_bloq] = {0};
+    char buff[size_bloq];
     while( read(p_h[0], buff, size_bloq) ){
         ++cont;
-        //printf("lei %d bloques\n",cont);
+        printf("lei %d bloques de %s\n",cont,buff);
     }
     
     gettimeofday(&t_fin, NULL);
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     int num_bloq = atoi(argv[1]);
-    int size_bloq = (atoi(argv[2]))/4;
+    int size_bloq = atoi(argv[2]);
     pid_t pid;
     
     if( pipe(p_h) == -1 ) {

@@ -138,7 +138,7 @@ void padre(int num_bloq, int size_bloq, pid_t pid){
     resultado.tv_usec = t_fin.tv_usec - t_inicio.tv_usec;
     float tiempo_total = resultado.tv_sec + resultado.tv_usec / 1000000.0;
     float W = num_bloq*4*size_bloq / tiempo_total;
-    printf("Tardo %ld segundos y %ld microsegundos\n El ancho de banda es %f Hz\n",resultado.tv_sec, resultado.tv_usec,W);    QueueDestroy(cola);
+    printf("Tardo %ld segundos y %ld microsegundos\n El ancho de banda es %f byte/s\n",resultado.tv_sec, resultado.tv_usec,W);    QueueDestroy(cola);
     }
     
 void hijo(int size_bloq){
