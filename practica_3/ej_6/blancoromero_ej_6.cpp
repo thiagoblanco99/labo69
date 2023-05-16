@@ -124,7 +124,7 @@ timeval t_inicio, t_fin;
 void padre(int num_bloq, int size_bloq, pid_t pid){
     
     Queue_t *cola = QueueCreate("cola", num_bloq, size_bloq);
-    char buff[size_bloq] = "12345678901";
+    char buff[size_bloq] = {'a'};
     //printf("esto es una %s \n",buff);
     gettimeofday(&t_inicio, NULL);
     for(int i=0; i<num_bloq; i++){
