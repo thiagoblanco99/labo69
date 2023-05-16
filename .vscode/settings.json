@@ -5,6 +5,7 @@
         "fcntl.h": "c",
         "types.h": "c",
         "wait.h": "c",
-        "cstdlib": "cpp"
+        "cstdlib": "cpp",
+        "chrono": "cpp"
     }
 }
