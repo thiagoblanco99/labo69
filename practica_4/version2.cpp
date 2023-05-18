@@ -46,10 +46,10 @@ private:
     void get(WorkUnit_t* wu)
     {
         unique_lock<mutex> lck(mtx);
-        while(getter==putter){
+        while(getter%maxq==putter%maxq){
             getcv.wait(lck);
         }
-        *wu=queue[getter];
+        *wu=queue[getter%maxq];
         getter++;
         putcv.notify_one();
     }
@@ -62,7 +62,12 @@ private:
         }
 
     }
-
+    void start()
+    {
+        for(int i=0;i<maxw;i++){
+            workers[i]=thread(Workserver_t::work,this);
+        }
+    }
     public:
     Workserver_t(int nq, int nw)
     {
@@ -70,6 +75,7 @@ private:
         maxw=nw;
         queue = new WorkUnit_t[nq];
         workers = new std::thread[nw];
+        start();
     }
     ~Workserver_t()
     {
@@ -77,19 +83,13 @@ private:
         delete[] queue;
         delete[] workers;
     }
-    void start()
-    {
-        for(int i=0;i<maxw;i++){
-            workers[i]=thread(&Workserver_t::work,this);
-        }
-    }
     void put(WorkUnit_t wu)
     {
         unique_lock<mutex> lck(mtx);
-        while((putter+1)%maxq==getter){
+        while((putter+1)%maxq==getter%maxq){
             putcv.wait(lck);
         }
-        queue[putter]=wu;
+        queue[putter%maxq]=wu;
         putter++;
         getcv.notify_one();
     }
