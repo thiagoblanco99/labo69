@@ -4,7 +4,7 @@
 #include <string>
 #include <time.h>
 #include <mutex>
-
+#include <semaphore.h>
 
 using namespace std;
 typedef void (*ProcFunc_t)(void *ctx);
@@ -37,11 +37,11 @@ private:
     std::thread *workers;
     int maxq;
     int maxw;
-    int putter=0;
-    int getter=0;
+    unsigned int putter=0;
+    unsigned int getter=0;
     mutex m;
-    mutex empty;
-    mutex full;
+    sem_t empty;
+    sem_t full;
     Workserver_t(int nq, int nw)
     {
         maxq=nq;
@@ -55,30 +55,37 @@ private:
         //delete[] workers;
     }
     
-    void   CreateWork_unit(ProcFunc_t f, void *ctx)
+    void   CreateWork_unit(ProcFunc_t f, void *ctx, WorkUnit_t *wu)
     {
-    WorkUnit_t *wu = new WorkUnit_t;
     wu->fun = f;
     wu->context = ctx;
     //wu->id = 0;
+    printf("se creo un trabajo \n");
     }
     
-    void  DestroyWork_unit(WorkUnit_t *wu)
-    {
-        delete wu;
-    }
+    //void  DestroyWork_unit(WorkUnit_t *wu)
+    //{
+    //    delete wu;
+    //}
 
-    void putWork_unit()
+    void putWork_unit(ProcFunc_t f, void *ctx)
     {
+        sem_wait(&full);
         m.lock();
-        while(putter){
-        }
+        CreateWork_unit(f,ctx,&queue[putter]);
+        putter=(putter+1)%maxq;
         m.unlock();
+        sem_post(&empty);
     }
 
-    void getWork_unit()
+    void getWork_unit(WorkUnit_t *wu)
     {
-
+        sem_wait(&empty);
+        m.lock();
+        wu=&queue[getter];
+        getter=(getter+1)%maxq;
+        m.unlock();
+        sem_post(&full);
     }
 
 };
