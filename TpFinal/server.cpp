@@ -12,7 +12,7 @@ class User{
 
     public:
     // variables que voy a usar    //
-        std::vector<int> salas;
+        std::vector<std::string> salas;
         std::vector<int> c2c;
         std::string name;
         int socket;
@@ -33,6 +33,11 @@ class User{
         int getId(){
             return id;
         }
+        void printSalas(){
+            for(int i=0;i<salas.size();i++){
+                std::cout<<salas[i]<<std::endl;
+            }
+        }
 };
 
 class Room{
@@ -50,7 +55,7 @@ class Room{
             this->id = id_in;
             this->users.push_back(owner_in);//lo agrego a los usuarios de la sala al dueño.
             this->owner = owner_in; // lo pongo como dueño.
-            owner_in->salas.push_back(this->id);// le agrego el id a la lista de salas del dueño.
+            owner_in->salas.push_back(this->getName());// le agrego el id a la lista de salas del dueño.
         }
         //~Room();//tengo que hacer un destructor
         std::string getName(){
@@ -62,9 +67,10 @@ class Room{
         std::vector<User*> getUsers(){
             return this->users;
         }
+
         void addUser(User* user){
             this->users.push_back(user); // agrego usuario a la lista de la sala  
-            user->salas.push_back(this->id);//agrego esta sala a la lista del usuario 
+            user->salas.push_back(this->getName());//agrego esta sala a la lista del usuario 
         }
         
         void removeUser(User* user){
@@ -122,12 +128,12 @@ class ChatServer{
         
         void removeUser(User user){
 
-            for (int i=0;i<rooms.size();i++){//tengo que hacer que se borre de las salas en las que este suscripto
-                if(rooms[i].id == user.salas[i]){
+            /*for (int i=0;i<rooms.size();i++){//tengo que hacer que se borre de las salas en las que este suscripto
+                if(rooms[i].name == user.salas[i]){
                     rooms[i].removeUser(&user);
                     break;
                 }
-            }
+            }*/
 
             for(int i=0; c2cs.size();i++){ //tengo que borrar las conexiones c2c que haya
                 if(c2cs[i].getId()==user.c2c[i]){
@@ -223,7 +229,7 @@ for(int i=0;i<server.getC2Cs().size();i++){
 
 std::cout<<"maria esta en las salas: "<<std::endl;
 for(int i=0;i<server.getUsers()[3].salas.size();i++){
-    std::cout<<server.getUsers()[3].salas[i]<<std::endl;
+    server.getUsers()[3].printSalas();// esto no funciona y no se porque :(((((((
 }
 
 
