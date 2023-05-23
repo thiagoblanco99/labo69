@@ -12,9 +12,9 @@ typedef void (*ProcFunc_t)(void *ctx);
 typedef unsigned int WorkUnitId;
 
 void f(void *ctx) {                 // function
-    char context=(char)ctx;
-    this_thread::sleep_for(chrono::microseconds{rand() % 100 + 1});
-    printf("Hola soy el thread %d y tengo para decirte %s", this_thread::get_id(),context);
+    char* context=(char*)ctx;
+    this_thread::sleep_for(chrono::seconds{rand() % 5 + 1});
+    std::cout<<"Hola soy el thread "<<this_thread::get_id()<<" y tengo para decirte "<<*context<<std::endl;
 }
 
 typedef struct {
@@ -22,6 +22,7 @@ WorkUnitId id;
 ProcFunc_t fun;
 void *context;
 } WorkUnit_t;
+
 
 class Workserver_t {
 
@@ -35,14 +36,9 @@ private:
     unsigned int getter=0;
     WorkUnit_t *queue;
     std::thread *workers;
+    bool Running=false;
 
-    WorkUnit_t createWorkunit(ProcFunc_t fun, void *ctx)
-    {
-        WorkUnit_t wu;
-        wu.fun=fun;
-        wu.context=ctx;
-        return wu;
-    }
+
     void get(WorkUnit_t* wu)
     {
         unique_lock<mutex> lck(mtx);
@@ -53,18 +49,24 @@ private:
         getter++;
         putcv.notify_one();
     }
-    void work()
+    static void work(Workserver_t* ws)
     {
         WorkUnit_t wu;
-        while(true){
-            get(&wu);
+        while(ws->isRunning()){
+            
+            ws->get(&wu);
+            printf("tome un workunit con running %d\n",ws->isRunning());
+            if(!ws->isRunning())break;
+            printf("ejecutando con running %d\n",ws->isRunning());
             wu.fun(wu.context);
         }
 
     }
     void start()
     {
+        Running=true;
         for(int i=0;i<maxw;i++){
+            //esta iniciacion esta bien?
             workers[i]=thread(Workserver_t::work,this);
         }
     }
@@ -73,15 +75,29 @@ private:
     {
         maxq=nq;
         maxw=nw;
-        queue = new WorkUnit_t[nq];
-        workers = new std::thread[nw];
+        queue = new WorkUnit_t[maxq];
+        workers = new std::thread[maxw];
         start();
     }
     ~Workserver_t()
     {
-        //tengo que agarrar todos los threads y vaciarlos
+        WorkUnit_t  fake;
+        Running=false;
+        printf("inicio destruccion\n");
+        for(int i=0;i<maxw;i++){put(fake);}
+        for(int i=0;i<maxw;i++){
+            printf("destruyendo thread %d\n",i);
+            workers[i].join();
+        }
         delete[] queue;
         delete[] workers;
+    }
+    WorkUnit_t createWorkunit(ProcFunc_t fun, void *ctx)
+    {
+        WorkUnit_t wu;
+        wu.fun=fun;
+        wu.context=ctx;
+        return wu;
     }
     void put(WorkUnit_t wu)
     {
@@ -93,4 +109,26 @@ private:
         putter++;
         getcv.notify_one();
     }
+    bool isRunning()
+    {
+        return Running;
+    }
+
+
 };
+void FakeUnitgen_t(Workserver_t* ws, char* c, int n)
+{
+    for(int i=0; i<n; i++){
+        ws->put(ws->createWorkunit(f,(void*)c));
+    }
+}
+
+int main(){
+char c='a';
+Workserver_t ws(10,10);
+FakeUnitgen_t(&ws,&c,10);
+cin.get();
+printf("terminando...\n");
+return 0;
+
+}
