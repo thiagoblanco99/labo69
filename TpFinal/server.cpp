@@ -33,6 +33,9 @@ class User{
         int getId(){
             return id;
         }
+        void addSala(std::string name){
+            this->salas.push_back(name);// completar
+        }
         void printSalas(){
             for(int i=0;i<salas.size();i++){
                 std::cout<<salas[i]<<std::endl;
@@ -70,7 +73,7 @@ class Room{
 
         void addUser(User* user){
             this->users.push_back(user); // agrego usuario a la lista de la sala  
-            user->salas.push_back(this->getName());//agrego esta sala a la lista del usuario 
+            user->addSala(this->getName());//agrego esta sala a la lista del usuario // tengo que crear una funcion que agregue el nombre
         }
         
         void removeUser(User* user){
