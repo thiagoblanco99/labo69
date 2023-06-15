@@ -20,7 +20,8 @@ typedef enum: uint8_t {
     TYPE_REQUEST_EXIT,//digo de salir de la sala o de una comunicacion C2C
     TYPE_RESPONSE_EXIT,//envio checkeo de salida de sesion.
     TYPE_REQUEST_DISCONNECT,//cierro la sesion
-    TYPE_RESPONSE_DISCONNECT//acepto cierre de sesión 
+    TYPE_RESPONSE_DISCONNECT,//acepto cierre de sesión
+    TYPE_INVALID// paquete invalido/ vacio
 } Type;
 
 typedef struct __attribute__((__packed__)) // __attribute__((__packed__)) es para empaquetar bien las estructuras y que no haya agujeros en el medio de la memoria (padding)
@@ -36,7 +37,7 @@ typedef struct __attribute__((__packed__)) // __attribute__((__packed__)) es par
 typedef struct __attribute__((__packed__)) 
 {
     uint16_t len16;
-    char str[0]; // esto es pegriloso. No se puede hacer sizeof(VString) porque no se sabe el tamaño de str. Se puede hacer sizeof(VString) + len8
+    char str[256];
 } VString;
 
 typedef enum: uint8_t {
@@ -141,7 +142,7 @@ typedef struct __attribute__((__packed__))
 //REQUEST-DISCONNECT-------------------------------
 typedef struct __attribute__((__packed__))
 {
-    uint8_t mode=1;
+    uint8_t mode;
 }REQUEST_DISCONNECT;
 //RESPONSE-DISCONNECT------------------------------
 typedef enum: uint8_t{
@@ -156,11 +157,16 @@ typedef struct __attribute__((__packed__))
 
 
 //PACKAGE-WITH-PAYLOAD-----------------------------
-typedef struct __attribute__((__packed__))
+struct PACKAGE
 {
+    PACKAGE (){
+        hdr.type = TYPE_INVALID;
+        hdr.size8 = sizeof(Header);
+        hdr.version= htons(0x0010);
+    }
     Header hdr;
 
-    union __attribute__((__packed__)) {
+    union {
         MENSAJE msg;
         REQUEST_CREATE req_create;
         RESPONSE_CREATE res_create;
@@ -174,11 +180,10 @@ typedef struct __attribute__((__packed__))
         RESPONSE_DISCONNECT res_disconnect;
     } payload;
 
-}PACKAGE;
+}__attribute__((__packed__));
 //-------------------------------------------------
 
 //FUNCIONES----------------------------------------
-
 //FUNCIONES PARA LEER HEADER.
 inline static uint16_t getVersion(const Header *hdr)// inline hace que se compile la funcion en el lugar donde se llama, en vez de hacer un llamado a la funcion
 {
@@ -200,12 +205,12 @@ inline static void setMENSAJE(PACKAGE *msg, MODE_MENSAJE mode, char *src, char *
 {
     msg->hdr.version = htons(VER_1);
     msg->hdr.type = TYPE_MENSAJE;
-    msg->hdr.size8 = htonl(sizeof(Header) + sizeof(MENSAJE) + lenmsg);
+    msg->hdr.size8 = htonl(sizeof(Header) + sizeof(MENSAJE));
     msg->payload.msg.mode = mode;
-    msg->payload.msg.src = src;
-    msg->payload.msg.dst = dst;
+    memcpy(msg->payload.msg.src, src, MAX_NAME);
+    memcpy(msg->payload.msg.dst, dst, MAX_NAME);
     msg->payload.msg.txt.len16 = htons(lenmsg);
-    msg->payload.msg.txt.str = txt;
+    memcpy(msg->payload.msg.txt.str, txt, lenmsg);
 }
 
 inline static uint8_t getModeMensaje(PACKAGE *msg)
@@ -246,7 +251,7 @@ inline static void setCreateUser(PACKAGE *msg, char *nombre)
     msg->hdr.type = TYPE_REQUEST_CREATE;
     msg->hdr.size8 = htonl(sizeof(Header) + sizeof(REQUEST_CREATE));
     msg->payload.req_create.mode = REQUEST_USER_CREATE;
-    msg->payload.req_create.name = nombre;
+    memcpy(msg->payload.req_create.name, nombre, MAX_NAME);
 
 }
 inline static void setCreateRoom(PACKAGE *msg, char *nombre)
@@ -255,7 +260,7 @@ inline static void setCreateRoom(PACKAGE *msg, char *nombre)
     msg->hdr.type = TYPE_REQUEST_CREATE;
     msg->hdr.size8 = htonl(sizeof(Header) + sizeof(REQUEST_CREATE));
     msg->payload.req_create.mode = REQUEST_ROOM_CREATE;
-    msg->payload.req_create.name = nombre;
+    memcpy(msg->payload.req_create.name, nombre, MAX_NAME);
 }
 inline static uint8_t getModeCreateRequest(PACKAGE *msg)
 {
@@ -288,7 +293,8 @@ inline static void setConnectUser(PACKAGE *msg, char *nombre)
     msg->hdr.type = TYPE_REQUEST_CONNECT;
     msg->hdr.size8 = htonl(sizeof(Header) + sizeof(REQUEST_CONNECT));
     msg->payload.req_connect.mode = REQUEST_USER_CONNECT;
-    msg->payload.req_connect.name = nombre;
+    memcpy(msg->payload.req_connect.name, nombre, MAX_NAME);
+
 }
 
 inline static void setConnectRoom(PACKAGE *msg, char *nombre)
@@ -297,7 +303,7 @@ inline static void setConnectRoom(PACKAGE *msg, char *nombre)
     msg->hdr.type = TYPE_REQUEST_CONNECT;
     msg->hdr.size8 = htonl(sizeof(Header) + sizeof(REQUEST_CONNECT));
     msg->payload.req_connect.mode = REQUEST_ROOM_CONNECT;
-    msg->payload.req_connect.name = nombre;
+    memcpy(msg->payload.req_connect.name, nombre, MAX_NAME);
 }
 
 inline static uint8_t getModeConnectRequest(PACKAGE *msg)
@@ -310,7 +316,7 @@ inline static char* getNameConnectRequest(PACKAGE *msg)
     return msg->payload.req_connect.name;
 }
 
-inline static uint8_t setConnectResponse(PACKAGE *msg, MODE_RESPONSE_CONNECT mode)
+inline static void setConnectResponse(PACKAGE *msg, MODE_RESPONSE_CONNECT mode)
 {
     msg->hdr.version = htons(VER_1);
     msg->hdr.type = TYPE_RESPONSE_CONNECT;
@@ -368,7 +374,7 @@ inline static void setExitRequest(PACKAGE *msg, char *nombre)
     msg->hdr.version = htons(VER_1);
     msg->hdr.type = TYPE_REQUEST_EXIT;
     msg->hdr.size8 = htonl(sizeof(Header) + sizeof(REQUEST_EXIT));
-    msg->payload.req_exit.name = nombre;
+    memcpy(msg->payload.req_exit.name, nombre, MAX_NAME);
 }
 
 inline static char* getNameExitRequest(PACKAGE *msg)
@@ -411,7 +417,5 @@ inline static uint8_t getModeDisconnectResponse(PACKAGE *msg)
 }
 
 //-----------------------------------------------------------------------------
-
-//FUNCIONES PARA MENSAJE
 
 
