@@ -67,7 +67,7 @@ typedef enum: uint8_t {
 
 typedef struct __attribute__((__packed__))
 {
-    MODE_REQUEST_CREATE mode;       
+    MODE_REQUEST_CREATE mode; 
     char name[MAX_NAME];
 }REQUEST_CREATE;
 //RESPONSE-CREATE----------------------------
@@ -95,7 +95,7 @@ typedef struct __attribute__((__packed__))
 //RESPONSE-CONNECTION-------------------------
 typedef enum: uint8_t{
     DENIED_CONNECT,
-    COPRRECT_CONNECT
+    CORRECT_CONNECT
 }MODE_RESPONSE_CONNECT;
 typedef struct __attribute__((__packed__))
 {
@@ -115,7 +115,7 @@ typedef struct __attribute__((__packed__))
 //RESPONSE-LISTA------------------------------
 typedef enum: uint8_t{
     DENIED_LISTA,
-    COPRRECT_LISTA
+    CORRECT_LISTA
 }MODE_RESPONSE_LISTA;
 typedef struct __attribute__((__packed__))
 {
@@ -131,7 +131,7 @@ typedef struct __attribute__((__packed__))
 //RESPONSE-EXIT-------------------------------
 typedef enum: uint8_t{
     DENIED_EXIT,
-    COPRRECT_EXIT
+    CORRECT_EXIT
 }MODE_RESPONSE_EXIT;
 typedef struct __attribute__((__packed__))
 {
@@ -147,7 +147,7 @@ typedef struct __attribute__((__packed__))
 //RESPONSE-DISCONNECT------------------------------
 typedef enum: uint8_t{
     DENIED_DISCONNECT,
-    COPRRECT_DISCONNECT
+    CORRECT_DISCONNECT
 }MODE_RESPONSE_DISCONNECT;
 typedef struct __attribute__((__packed__))
 {
@@ -201,19 +201,23 @@ inline static Type getType(const Header *hdr)
 }
 
 //FUNCIONES PARA MENSAJE
-inline static void setMENSAJE(PACKAGE *msg, MODE_MENSAJE mode, char *src, char *dst, char *txt, uint16_t lenmsg)
+inline static void setMENSAJE(PACKAGE *msg,char *src, char *dst, char *txt, uint16_t lenmsg)
 {
     msg->hdr.version = htons(VER_1);
     msg->hdr.type = TYPE_MENSAJE;
     msg->hdr.size8 = htonl(sizeof(Header) + sizeof(MENSAJE));
-    msg->payload.msg.mode = mode;
     memcpy(msg->payload.msg.src, src, MAX_NAME);
     memcpy(msg->payload.msg.dst, dst, MAX_NAME);
     msg->payload.msg.txt.len16 = htons(lenmsg);
     memcpy(msg->payload.msg.txt.str, txt, lenmsg);
 }
 
-inline static uint8_t getModeMensaje(PACKAGE *msg)
+inline static void setModeMensaje(PACKAGE *msg, MODE_MENSAJE mode)
+{
+    msg->payload.msg.mode = mode;
+}
+
+inline static MODE_MENSAJE getModeMensaje(PACKAGE *msg)
 {
     return msg->payload.msg.mode;
 }
@@ -262,7 +266,7 @@ inline static void setCreateRoom(PACKAGE *msg, char *nombre)
     msg->payload.req_create.mode = REQUEST_ROOM_CREATE;
     memcpy(msg->payload.req_create.name, nombre, MAX_NAME);
 }
-inline static uint8_t getModeCreateRequest(PACKAGE *msg)
+inline static MODE_REQUEST_CREATE getModeCreateRequest(PACKAGE *msg)
 {
     return msg->payload.req_create.mode;
 }
@@ -279,7 +283,7 @@ inline static void setCreateResponse(PACKAGE *msg, MODE_RESPONSE_CREATE mode)
     msg->hdr.size8 = htonl(sizeof(Header) + sizeof(RESPONSE_CREATE));
     msg->payload.res_create.mode = mode;char buffer[MAX_MSG];
 }
-inline static uint8_t getModeCreateResponse(PACKAGE *msg)
+inline static MODE_RESPONSE_CREATE getModeCreateResponse(PACKAGE *msg)
 {
     return msg->payload.res_create.mode;
 }
@@ -417,5 +421,9 @@ inline static uint8_t getModeDisconnectResponse(PACKAGE *msg)
 }
 
 //-----------------------------------------------------------------------------
-
+//HAGO UN CLEARPACKET PARA QUE EL PAQUETE QUEDE VACIO Y NO TENGA BASURA
+inline static void clearPacket(PACKAGE *msg)
+{
+    memset(msg, 0, sizeof(PACKAGE));
+}
 
