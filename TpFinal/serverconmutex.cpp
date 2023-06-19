@@ -16,6 +16,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <functional>
+#include <condition_variable>
 
 #include "protocolo.h"
 
@@ -36,7 +37,6 @@ public:
     std::string name;
     int socket;
     sockaddr_in address;
-    int mode;
     std::thread t_user;
     //----------------------------
     // mutex a usar
@@ -44,7 +44,6 @@ public:
     std::mutex mut_name;
     std::mutex mut_socket;
     std::mutex mut_address;
-    std::mutex mut_mode;
     std::mutex mut_thread;
     //------------------------
     // constructror//
@@ -55,11 +54,12 @@ public:
         this->address = address_in;
         this->t_user = std::thread(reader_in, this);
     }
-    //destructor//
+    // destructor//
     ~User()
     {
         printf("se borra el usuario\n");
         this->t_user.join();
+        close(this->socket);
     }
     // getters//
     void setName(std::string name_in)
@@ -97,6 +97,7 @@ public:
             if (salas[i] == name)
             {
                 salas.erase(salas.begin() + i);
+                return;
             }
         }
     }
@@ -117,13 +118,11 @@ private:
 public:
     // variables a usar//
     std::string name;
-    int id;
     std::vector<User *> users;
     User *owner;
     //------------------------
     // mutex a usar
     std::mutex mut_name;
-    std::mutex mut_id;
     std::mutex mut_users;
     std::mutex mut_owner;
     //------------------------
@@ -145,11 +144,6 @@ public:
     {
         std::unique_lock<std::mutex> lck(mut_name);
         return this->name;
-    }
-    int getId()
-    {
-        std::unique_lock<std::mutex> lck(mut_id);
-        return this->id;
     }
     std::string getOwner()
     {
@@ -191,12 +185,23 @@ class ChatServer
 private:
 public:
     std::vector<User *> users; // TENGO QUE HACER TODAS LAS FUNCIONES CON ESTOS PUNTEROS.
-    std::vector<Room *> rooms; // TENGO QUE HACER TODAS LAS FUNCIONES CON ESTOS PUNTEROS.
+    std::vector<Room *> rooms; // TENGO QUE HACER TODAS LAS FUNCIONES CON ESTOS PUNTEROS.std::vector<User *> disconnections;//todo lo que meta en este vector es para desconectar
     struct sockaddr_in serv_addr;
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    // VARIABLES PARA HACER UN QUEUE DE THREADS A JOINEAR
+    std::vector<User *> disconnections;
+    unsigned int maxq = 10; // numero maximo de elementos en la cola
+    std::condition_variable putcv;
+    std::condition_variable getcv;
+    unsigned int putter = 0;
+    unsigned int getter = 0;
+    std::thread joiner;
+    bool isRunning = true;
+    //---------------------------------------------------
     // mutex a usar
     std::mutex mut_users;
     std::mutex mut_rooms;
+    std::mutex mut_disconnections;
     // constructor//
     ChatServer()
     {
@@ -215,6 +220,15 @@ public:
             error("ERROR on binding");
         }
         listen(this->sockfd, 5);
+        // habilito el thread joiner
+        joiner = std::thread(&ChatServer::joinerWork, this);
+    }
+    // hago destructor
+    ~ChatServer()
+    {
+        isRunning = false;
+        joiner.join();
+        close(this->sockfd);
     }
     // agregar usuario//
     void addUser(std::string name_in, int socket_in, sockaddr_in address_in)
@@ -360,7 +374,7 @@ public:
                 if (n < 0)
                     error("ERROR writing to socket");
             }
-            else if(i==users.size()-1)
+            else if (i == users.size() - 1)
             {
                 std::string serv = "Server";
                 std::string no_existe = "no existe el usuario ";
@@ -524,10 +538,10 @@ public:
         return;
     }
 
-    void disconnectUser(PACKAGE *pkt, User *user)
+    void disconnectUser(User *user)
     {
         PACKAGE pkt_server;
-        std::string dst = getDstMensaje(pkt);
+        std::string dst = user->getName();
         std::string serv = "Server";
         std::string msg = "desconectado";
         setMENSAJE(&pkt_server, &serv[0], &dst[0], &msg[0], msg.size());
@@ -540,7 +554,6 @@ public:
         {
             QuitRoom(user->salas[i], user);
         }
-
         for (int i = 0; i < users.size(); i++)
         {
             if (users[i]->getName() == user->getName())
@@ -548,8 +561,7 @@ public:
                 users.erase(users.begin() + i);
             }
         }
-
-        delete user;
+        put(user); // en fila para desconectar al usuario
     }
     void modeRead(PACKAGE *pkt, User *user)
     {
@@ -616,7 +628,7 @@ public:
             break;
         case TYPE_REQUEST_DISCONNECT:
             printf("request disconnect\n");
-            disconnectUser(pkt, user);
+            disconnectUser(user);
             break;
         case TYPE_MENSAJE:
             if (getModeMensaje(pkt) == MENSAJE_USER)
@@ -647,12 +659,55 @@ public:
                 error("ERROR reading from socket");
         }
         printf("se desconecto un thread\n");
+        disconnectUser(user); // en fila para desconectar al usuario
     }
     void work()
     {
+
         while (1)
         {
             connection();
+        }
+    }
+    // implemento algoritmos de queue para hacer los join y delete de los threads de usuarios.
+    void put(User *user)
+    {
+        printf("antes del mutex\n");
+        std::unique_lock<std::mutex> lck(mut_disconnections);
+        while (getter % maxq == (putter+1) % maxq)
+        {
+            printf("despues del mutex 1\n");
+            putcv.wait(lck);
+        }
+        disconnections.push_back(user);
+        printf("despues del mutex 2\n");
+        putter++;
+        getcv.notify_one();
+    }
+    void get()
+    {
+        std::unique_lock<std::mutex> lck(mut_disconnections);
+        while (getter % maxq == putter % maxq)
+        {
+            getcv.wait(lck);
+        }
+        // tengo que borrar el usuario de las salas que haya
+        printf("tomo tarea");
+        for (int i = 0; i < disconnections[getter % maxq]->salas.size(); i++)
+        {
+            QuitRoom(disconnections[getter % maxq]->salas[i], disconnections[getter % maxq]);
+        }
+        delete disconnections[getter % maxq];
+        getter++;
+        putcv.notify_one();
+    }
+
+    void joinerWork()
+    {
+        while (isRunning)
+        {
+            printf("joiner is running");
+            get();
         }
     }
 };
@@ -664,3 +719,9 @@ int main()
     server.work();
     return 0;
 }
+
+
+
+
+
+//TENGO QUE HACER LAS DESCONEXIONES BIEN
