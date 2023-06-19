@@ -360,7 +360,18 @@ public:
                 if (n < 0)
                     error("ERROR writing to socket");
             }
-
+            else if(i==users.size()-1)
+            {
+                std::string serv = "Server";
+                std::string no_existe = "no existe el usuario ";
+                PACKAGE pkt_server;
+                std::cout << "no existe el usuario" << std::endl;
+                setMENSAJE(&pkt_server, &serv[0], &src[0], &no_existe[0], no_existe.size());
+                setModeMensaje(&pkt_server, MENSAJE_SERVER);
+                int n = send(users[i]->getSocket(), &pkt_server, sizeof(PACKAGE), 0);
+                if (n < 0)
+                    error("ERROR writing to socket");
+            }
         }
     }
     void sendMsgRoom(PACKAGE *pkt, User *user)
