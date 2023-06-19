@@ -100,8 +100,9 @@ public:
         printf("8. desconectarse\n");
         printf("9. volver a modo escucha\n");
         // leo de standar input el entero seleccionado y hago un switch
-        std::string optionStr;
+        
         std::string payload;
+        std::string optionStr;
         int option;
         while (std::cin >> optionStr)
         {
