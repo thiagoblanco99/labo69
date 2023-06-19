@@ -39,7 +39,7 @@ private:
     int maxfd;
     std::vector<std::string> salas_recientes;
     std::vector<std::string> usuarios_recientes;
-    int mode_msg=0; //es para recordar si estaba mandando mensajes a usuario o a salas 
+    int mode_msg = 0; // es para recordar si estaba mandando mensajes a usuario o a salas
 
 public:
     PACKAGE pkt_write;
@@ -100,9 +100,23 @@ public:
         printf("8. desconectarse\n");
         printf("9. volver a modo escucha\n");
         // leo de standar input el entero seleccionado y hago un switch
-        int option;
-        std::cin >> option;
+        std::string optionStr;
         std::string payload;
+        int option;
+        while (std::cin >> optionStr)
+        {
+            try
+            {
+                option = std::stoi(optionStr);
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << "Introduzca una opcion correcta.\n";
+                continue;
+            }
+            break;
+        }
+
         // copio usuario a src
         switch (option)
         {
@@ -279,6 +293,7 @@ public:
             break;
         case 9:
         default:
+            printf("salio de las opciones\n");
             return;
         }
         return;
@@ -300,10 +315,11 @@ public:
             {
                 // si es mensaje de sala
                 // lo imprimo
-                std::cout<<"sala " << getDstMensaje(pkt)<<":"<< getSrcMensaje(pkt) << ": " << getTxtMensaje(pkt) << std::endl;
+                std::cout << "sala " << getDstMensaje(pkt) << ":" << getSrcMensaje(pkt) << ": " << getTxtMensaje(pkt) << std::endl;
                 // HAY QUE MODIFICAR ESTO PARA QUE QUEDE MAS LINDO
             }
-            if(getModeMensaje(pkt) == MENSAJE_SERVER){
+            if (getModeMensaje(pkt) == MENSAJE_SERVER)
+            {
                 std::cout << getSrcMensaje(pkt) << ": " << getTxtMensaje(pkt) << std::endl;
             }
             break;
@@ -423,7 +439,7 @@ public:
                 }
                 else
                 {
-                    clearPacket(&this->pkt_write);//limpio el paquete para que no queden cosas de antes
+                    clearPacket(&this->pkt_write); // limpio el paquete para que no queden cosas de antes
                     // Busco en el array de entrada si se quiere setear algo
                     if (input.find("@mode") != std::string::npos)
                     {
@@ -441,9 +457,19 @@ public:
                         }
                         else
                         {
-                            if(mode_msg==1){setModeMensaje(&this->pkt_write, MENSAJE_USER);}
-                            else if(mode_msg==2){setModeMensaje(&this->pkt_write, MENSAJE_ROOM);}//esto es para que no se rompa cuando no se selecciono un modo
-                            else{printf("no se puede mandar un mensaje sin antes seleccionar un destinatario\n");break;}
+                            if (mode_msg == 1)
+                            {
+                                setModeMensaje(&this->pkt_write, MENSAJE_USER);
+                            }
+                            else if (mode_msg == 2)
+                            {
+                                setModeMensaje(&this->pkt_write, MENSAJE_ROOM);
+                            } // esto es para que no se rompa cuando no se selecciono un modo
+                            else
+                            {
+                                printf("no se puede mandar un mensaje sin antes seleccionar un destinatario\n");
+                                break;
+                            }
                             setMENSAJE(&this->pkt_write, &this->usuario[0], &this->dst[0], &input[0], input.size());
                             // PORQUE NO PUEDO LEER ESTO ? std::cout<<"mode: "<<getModeMensaje(&this->pkt_write)<<std::endl;
                             if (send(this->sockfd, &this->pkt_write, sizeof(this->pkt_write), 0) == -1)

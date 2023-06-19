@@ -55,6 +55,12 @@ public:
         this->address = address_in;
         this->t_user = std::thread(reader_in, this);
     }
+    //destructor//
+    ~User()
+    {
+        printf("se borra el usuario\n");
+        this->t_user.join();
+    }
     // getters//
     void setName(std::string name_in)
     {
@@ -128,6 +134,11 @@ public:
         this->users.push_back(owner_in); // lo agrego a los usuarios de la sala al dueño.
         this->owner = owner_in;          // lo pongo como dueño.
         this->owner->addSala(this->name);
+    }
+    // destructor//
+    ~Room()
+    {
+        printf("se borra la sala\n");
     }
     // getters//
     std::string getName()
@@ -317,6 +328,7 @@ public:
                 rooms[i]->deleteUser(user);
                 if (rooms[i]->users.size() == 0) // si la sala queda vacia la elimino
                 {
+                    delete rooms[i];
                     rooms.erase(rooms.begin() + i);
                 }
                 printf("usuario eliminado de la sala\n");
@@ -348,6 +360,7 @@ public:
                 if (n < 0)
                     error("ERROR writing to socket");
             }
+
         }
     }
     void sendMsgRoom(PACKAGE *pkt, User *user)
@@ -358,7 +371,7 @@ public:
         std::cout << "src: " << src << std::endl;
         std::cout << "dst: " << dst << std::endl;
         std::cout << "msg: " << msg << std::endl;
-        if (rooms.size()==0) // si no hay salas creadas le mando un mensaje al usuario que no hay salas creadas.
+        if (rooms.size() == 0) // si no hay salas creadas le mando un mensaje al usuario que no hay salas creadas.
         {
             std::string serv = "Server";
             std::string no_existe = "no hay salas creadas";
@@ -415,7 +428,7 @@ public:
             else if (i == rooms.size() - 1)
             {
                 std::string serv = "Server";
-                std::string no_existe = "no existe el room";
+                std::string no_existe = "no existe el room ";
                 PACKAGE pkt_server;
                 std::cout << "no existe el room" << std::endl;
                 setMENSAJE(&pkt_server, &serv[0], &src[0], &no_existe[0], no_existe.size());
@@ -431,14 +444,15 @@ public:
     void sendListaUser(PACKAGE *pkt, User *user)
     {
         std::string lista;
-        lista += "lista de usuarios conectados: \n"; 
+        std::string dst = user->getName();
+        lista += "lista de usuarios conectados: \n";
         for (int i = 0; i < users.size(); i++)
         {
-            if(users[i]->getName()!=user->getName())
+            if (users[i]->getName() != user->getName())
             {
-            lista += "-";
-            lista += users[i]->getName();
-            lista += "\n";
+                lista += "-";
+                lista += users[i]->getName();
+                lista += "\n";
             }
         }
         std::cout << "lista: " << lista << std::endl;
@@ -449,9 +463,34 @@ public:
         if (n < 0)
             error("ERROR writing to socket");
         clearPacket(&pkt_server);
-        setMENSAJE(&pkt_server, &serv[0], &serv[0], &lista[0], lista.size());
+        setMENSAJE(&pkt_server, &serv[0], &dst[0], &lista[0], lista.size());
         setModeMensaje(&pkt_server, MENSAJE_SERVER);
-        n=send(user->getSocket(), &pkt_server, sizeof(PACKAGE), 0);
+        n = send(user->getSocket(), &pkt_server, sizeof(PACKAGE), 0);
+        if (n < 0)
+            error("ERROR writing to socket");
+    }
+    void sendListaRooms(PACKAGE *pkt, User *user)
+    {
+        std::string lista;
+        std::string dst = user->getName();
+        lista += "lista de salas creadas: \n";
+        for (int i = 0; i < rooms.size(); i++)
+        {
+            lista += "-";
+            lista += rooms[i]->getName();
+            lista += "\n";
+        }
+        std::cout << "lista: " << lista << std::endl;
+        std::string serv = "Server";
+        PACKAGE pkt_server;
+        setListaResponse(&pkt_server, CORRECT_LISTA);
+        int n = send(user->getSocket(), &pkt_server, sizeof(PACKAGE), 0);
+        if (n < 0)
+            error("ERROR writing to socket");
+        clearPacket(&pkt_server);
+        setMENSAJE(&pkt_server, &serv[0], &dst[0], &lista[0], lista.size());
+        setModeMensaje(&pkt_server, MENSAJE_SERVER);
+        n = send(user->getSocket(), &pkt_server, sizeof(PACKAGE), 0);
         if (n < 0)
             error("ERROR writing to socket");
     }
@@ -474,6 +513,33 @@ public:
         return;
     }
 
+    void disconnectUser(PACKAGE *pkt, User *user)
+    {
+        PACKAGE pkt_server;
+        std::string dst = getDstMensaje(pkt);
+        std::string serv = "Server";
+        std::string msg = "desconectado";
+        setMENSAJE(&pkt_server, &serv[0], &dst[0], &msg[0], msg.size());
+        setModeMensaje(&pkt_server, MENSAJE_SERVER);
+        int n = send(user->getSocket(), &pkt_server, sizeof(PACKAGE), 0);
+        if (n < 0)
+            error("ERROR writing to socket");
+
+        for (int i = 0; i < user->salas.size(); i++)
+        {
+            QuitRoom(user->salas[i], user);
+        }
+
+        for (int i = 0; i < users.size(); i++)
+        {
+            if (users[i]->getName() == user->getName())
+            {
+                users.erase(users.begin() + i);
+            }
+        }
+
+        delete user;
+    }
     void modeRead(PACKAGE *pkt, User *user)
     {
         printf("size: %d\n", getSize8(&pkt->hdr));
@@ -528,6 +594,7 @@ public:
             else if (getModeListaRequest(pkt) == REQUEST_LISTA_ROOM)
             {
                 printf("room\n");
+                sendListaRooms(pkt, user);
             }
             break;
         case TYPE_REQUEST_EXIT:
@@ -538,6 +605,7 @@ public:
             break;
         case TYPE_REQUEST_DISCONNECT:
             printf("request disconnect\n");
+            disconnectUser(pkt, user);
             break;
         case TYPE_MENSAJE:
             if (getModeMensaje(pkt) == MENSAJE_USER)
@@ -566,10 +634,6 @@ public:
             modeRead(&pkt, user);
             if (n < 0)
                 error("ERROR reading from socket");
-
-            // n = write(user->getSocket(),"I got your message",18);
-            if (n < 0)
-                error("ERROR writing to socket");
         }
         printf("se desconecto un thread\n");
     }
