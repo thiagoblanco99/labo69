@@ -40,11 +40,7 @@ public:
     std::thread t_user;
     //----------------------------
     // mutex a usar
-    std::mutex mut_salas;
-    std::mutex mut_name;
-    std::mutex mut_socket;
-    std::mutex mut_address;
-    std::mutex mut_thread;
+    std::mutex mut_user;
     //------------------------
     // constructror//
     User(std::string name_in, int socket_in, struct sockaddr_in address_in, std::function<void(User *)> reader_in)
@@ -64,34 +60,29 @@ public:
     // getters//
     void setName(std::string name_in)
     {
-        std::unique_lock<std::mutex> lck(mut_name);
+
         this->name = name_in;
     }
     std::string getName()
     {
-        std::unique_lock<std::mutex> lck(mut_name);
         return this->name;
     }
     int getSocket()
     {
-        std::unique_lock<std::mutex> lck(mut_socket);
         return this->socket;
     }
     int getip()
     { // obtengo ip del usuario
-        std::unique_lock<std::mutex> lck(mut_address);
         return this->address.sin_addr.s_addr;
     }
     // agregar salas//
     void addSala(std::string name)
     {
-        std::unique_lock<std::mutex> lck(mut_salas);
         this->salas.push_back(name); // completar
     }
     // borrar sala//
     void deleteSala(std::string name)
     {
-        std::unique_lock<std::mutex> lck(mut_salas);
         for (int i = 0; i < salas.size(); i++)
         {
             if (salas[i] == name)
@@ -104,7 +95,6 @@ public:
     // imprimir salas//
     void printSalas()
     {
-        std::unique_lock<std::mutex> lck(mut_salas);
         for (int i = 0; i < salas.size(); i++)
         {
             std::cout << salas[i] << std::endl;
@@ -122,9 +112,7 @@ public:
     User *owner;
     //------------------------
     // mutex a usar
-    std::mutex mut_name;
-    std::mutex mut_users;
-    std::mutex mut_owner;
+    std::mutex mut_room;
     //------------------------
     // constructor//
     Room(std::string name_in, User *owner_in)
@@ -142,25 +130,21 @@ public:
     // getters//
     std::string getName()
     {
-        std::unique_lock<std::mutex> lck(mut_name);
         return this->name;
     }
     std::string getOwner()
     {
-        std::unique_lock<std::mutex> lck(mut_owner);
         return this->owner->getName();
     }
     // agregar usuarios//
     void addUser(User *user)
     {
-        std::unique_lock<std::mutex> lck(mut_users);
         this->users.push_back(user);
         user->addSala(this->name);
     }
     // imprimir usuarios//
     void printUsers()
     {
-        std::unique_lock<std::mutex> lck(mut_users);
         for (int i = 0; i < users.size(); i++)
         {
             std::cout << users[i]->getName() << std::endl;
@@ -169,7 +153,6 @@ public:
     // eliminar usuarios//
     void deleteUser(User *user)
     {
-        std::unique_lock<std::mutex> lck(mut_users);
         for (int i = 0; i < users.size(); i++)
         {
             if (this->users[i]->getName() == user->getName())
@@ -233,7 +216,6 @@ public:
     // agregar usuario//
     void addUser(std::string name_in, int socket_in, sockaddr_in address_in)
     { // creo un usuario con un nombre cualquiera y lo agrego a la lista de usuarios.
-        // std::unique_lock<std::mutex> lck(mut_users);
         PACKAGE pkt;
         User *user = new User(name_in, socket_in, address_in, std::bind(&ChatServer::reader, this, std::placeholders::_1)); // TENGO QUE ALOCAR MEMORIA PARA LOS PUNTEROS A USUARIOS
         this->users.push_back(user);
@@ -242,7 +224,9 @@ public:
 
     void ChangeUserName(std::string name_in, User *user)
     { //
-        // std::unique_lock<std::mutex> lck(mut_users);
+        std::unique_lock<std::mutex> lck_user(user->mut_user, std::defer_lock);
+        std::unique_lock<std::mutex> lck_users(mut_users, std::defer_lock);
+        std::lock(lck_user, lck_users);
         PACKAGE pkt;
         std::cout << "nombre recibido: " << name_in << std::endl;
         int flag = 0;
@@ -268,15 +252,15 @@ public:
     // agregar sala//
     void addRoom(std::string name_in, User *owner_in)
     {
-        // std::unique_lock<std::mutex> lck(mut_rooms);
-
         Room *room = new Room(name_in, owner_in); // TENGO QUE ALOCAR MEMORIA PARA LOS PUNTEROS A SALAS
         this->rooms.push_back(room);
     }
 
     void createRoom(std::string name_in, User *user)
     {
-        // std::unique_lock<std::mutex> lck(mut_rooms);
+        std::unique_lock<std::mutex> lck_rooms(mut_rooms, std::defer_lock);
+        std::unique_lock<std::mutex> lck_user(user->mut_user, std::defer_lock);
+        std::lock(lck_rooms, lck_user);
         PACKAGE pkt;
         std::cout << "nombre de sala recibido: " << name_in << std::endl;
         int flag = 0;
@@ -302,6 +286,9 @@ public:
     }
     void connectUserToRoom(std::string name_in, User *user)
     {
+        std::unique_lock<std::mutex> lck_rooms(mut_rooms, std::defer_lock);
+        std::unique_lock<std::mutex> lck_user(user->mut_user, std::defer_lock);
+        std::lock(lck_rooms, lck_user);
         PACKAGE pkt;
         for (int i = 0; i < rooms.size(); i++)
         {
@@ -332,8 +319,11 @@ public:
     }
     void QuitRoom(std::string name_in, User *user) // saca al usuario de la sala
     {
-        PACKAGE pkt;
+        std::unique_lock<std::mutex> lck_rooms(mut_rooms, std::defer_lock);
+        std::unique_lock<std::mutex> lck_user(user->mut_user, std::defer_lock);
+        std::lock(lck_rooms, lck_user);
 
+        PACKAGE pkt;
         user->deleteSala(name_in);
         for (int i = 0; i < rooms.size(); i++)
         {
@@ -358,6 +348,7 @@ public:
     // del pkt extraigo src y dst, el mensaje y lo envio a destino.
     void sendMsgUser(PACKAGE *pkt, User *user)
     {
+        std::unique_lock<std::mutex> lck(mut_users);
         std::string dst = getDstMensaje(pkt);
         std::string src = getSrcMensaje(pkt);
         std::string msg = getTxtMensaje(pkt);
@@ -370,9 +361,11 @@ public:
         {
             if (users[i]->getName() == dst)
             {
+                std::unique_lock<std::mutex> lck(users[i]->mut_user);
                 int n = send(users[i]->getSocket(), pkt, sizeof(PACKAGE), 0);
                 if (n < 0)
                     error("ERROR writing to socket");
+                return;
             }
             else if (i == users.size() - 1)
             {
@@ -382,7 +375,8 @@ public:
                 std::cout << "no existe el usuario" << std::endl;
                 setMENSAJE(&pkt_server, &serv[0], &src[0], &no_existe[0], no_existe.size());
                 setModeMensaje(&pkt_server, MENSAJE_SERVER);
-                int n = send(user->getSocket(), &pkt_server, sizeof(PACKAGE), 0);//esta linea hay que corregirla
+                std::unique_lock<std::mutex> lck(user->mut_user);
+                int n = send(user->getSocket(), &pkt_server, sizeof(PACKAGE), 0); // esta linea hay que corregirla
                 if (n < 0)
                     error("ERROR writing to socket");
             }
@@ -390,6 +384,8 @@ public:
     }
     void sendMsgRoom(PACKAGE *pkt, User *user)
     {
+        std::unique_lock<std::mutex> lck(mut_rooms);
+
         std::string dst = getDstMensaje(pkt);
         std::string src = getSrcMensaje(pkt);
         std::string msg = getTxtMensaje(pkt);
@@ -404,6 +400,7 @@ public:
             std::cout << "no hay salas creadas" << std::endl;
             setMENSAJE(&pkt_server, &serv[0], &src[0], &no_existe[0], no_existe.size());
             setModeMensaje(&pkt_server, MENSAJE_SERVER);
+            std::unique_lock<std::mutex> lck(user->mut_user);
             int n = send(user->getSocket(), &pkt_server, sizeof(PACKAGE), 0);
             if (n < 0)
                 error("ERROR writing to socket");
@@ -411,7 +408,7 @@ public:
         }
         for (int i = 0; i < rooms.size(); i++)
         {
-
+            std::unique_lock<std::mutex> lck(rooms[i]->mut_room);
             if (rooms[i]->getName() == dst)
             {
                 // chequeo si el que mando el mensaje pertenece al room, sino le mando  un mensaje con src=server que diga que no puede mandar el mensaje.
@@ -429,6 +426,7 @@ public:
                         std::cout << "no pertenece al room" << std::endl;
                         setMENSAJE(&pkt_server, &serv[0], &src[0], &no_pertenece[0], no_pertenece.size());
                         setModeMensaje(&pkt_server, MENSAJE_SERVER);
+                        std::unique_lock<std::mutex> lck(user->mut_user);
                         int n = send(user->getSocket(), &pkt_server, sizeof(PACKAGE), 0);
                         if (n < 0)
                             error("ERROR writing to socket");
@@ -443,9 +441,11 @@ public:
                     }
                     else
                     {
+                        std::unique_lock<std::mutex> lck(users[j]->mut_user);
                         int n = send(rooms[i]->users[j]->getSocket(), pkt, sizeof(PACKAGE), 0);
                         if (n < 0)
                             error("ERROR writing to socket");
+                        users[j]->mut_user.unlock();
                     }
                 }
                 return;
@@ -463,11 +463,15 @@ public:
                     error("ERROR writing to socket");
                 return;
             }
+            rooms[i]->mut_room.unlock();
         }
     }
 
     void sendListaUser(PACKAGE *pkt, User *user)
     {
+        std::unique_lock<std::mutex> lck_users(mut_users, std::defer_lock);
+        std::unique_lock<std::mutex> lck_user(user->mut_user, std::defer_lock);
+        std::lock(lck_users, lck_user);
         std::string lista;
         std::string dst = user->getName();
         lista += "lista de usuarios conectados: \n";
@@ -496,6 +500,10 @@ public:
     }
     void sendListaRooms(PACKAGE *pkt, User *user)
     {
+        std::unique_lock<std::mutex> lck_rooms(mut_rooms, std::defer_lock);
+        std::unique_lock<std::mutex> lck_user(user->mut_user, std::defer_lock);
+        std::lock(lck_rooms, lck_user);
+
         std::string lista;
         std::string dst = user->getName();
         lista += "lista de salas creadas: \n";
@@ -540,11 +548,12 @@ public:
 
     bool disconnectUser(User *user)
     {
+        std::unique_lock<std::mutex> lck(user->mut_user);
         PACKAGE pkt_server;
         std::string dst = user->getName();
         std::string serv = "Server";
         std::string msg = "desconectado...";
-        setMENSAJE(&pkt_server, &serv[0], &dst[0], &msg[0], msg.size()-1);//si saco el uno se printean unos caracteres random y no se porque.
+        setMENSAJE(&pkt_server, &serv[0], &dst[0], &msg[0], msg.size() - 1); // si saco el uno se printean unos caracteres random y no se porque.
         setModeMensaje(&pkt_server, MENSAJE_SERVER);
         int n = send(user->getSocket(), &pkt_server, sizeof(PACKAGE), 0);
         if (n < 0)
@@ -622,7 +631,7 @@ public:
             if (getModeMensaje(pkt) == MENSAJE_USER)
             {
                 printf("mensaje a usuario\n");
-                sendMsgUser(pkt,user);
+                sendMsgUser(pkt, user);
             }
             else if (getModeMensaje(pkt) == MENSAJE_ROOM)
             {
@@ -639,13 +648,14 @@ public:
     void reader(User *user)
     {
         int n;
-        bool vivo=true;
+        bool vivo = true;
         PACKAGE pkt;
 
         while (n = read(user->getSocket(), &pkt, sizeof(pkt)))
         {
-            vivo=modeRead(&pkt, user);
-            if(!vivo)break;
+            vivo = modeRead(&pkt, user);
+            if (!vivo)
+                break;
             if (n < 0)
                 error("ERROR reading from socket");
         }
@@ -677,27 +687,26 @@ public:
     }
     void get()
     {
-        std::unique_lock<std::mutex> lck(mut_disconnections);
+        std::unique_lock<std::mutex> lck_discon(mut_disconnections);
         while (getter % maxq == putter % maxq)
         {
-            getcv.wait(lck);
+            getcv.wait(lck_discon);
         }
+        std::unique_lock<std::mutex> lck_users(mut_users);
         // tengo que borrar el usuario de las salas que haya
+
+        printf("tomo tarea\n");
         for (int i = 0; i < disconnections[getter % maxq]->salas.size(); i++)
         {
             QuitRoom(disconnections[getter % maxq]->salas[i], disconnections[getter % maxq]);
         }
+
         for (int i = 0; i < users.size(); i++)
         {
             if (users[i]->getName() == disconnections[getter % maxq]->getName())
             {
                 users.erase(users.begin() + i);
             }
-        }
-        printf("tomo tarea\n");
-        for (int i = 0; i < disconnections[getter % maxq]->salas.size(); i++)
-        {
-            QuitRoom(disconnections[getter % maxq]->salas[i], disconnections[getter % maxq]);
         }
         delete disconnections[getter % maxq];
         printf("borre el cliente\n");
@@ -723,4 +732,5 @@ int main()
     return 0;
 }
 
-// TENGO QUE HACER LAS DESCONEXIONES BIEN
+// CUANDO UN USUARIO ESTA CONECTADO A UNA SALA Y SALE DE LA SALA, 
+//SE ROMPE CUANDO EL SERVIDOR INTENTA MANDAR UN MENSAJE AL SOCKET QUE NO EXISTE.
